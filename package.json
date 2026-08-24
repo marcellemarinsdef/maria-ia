@@ -18,7 +18,7 @@
     "seed": "tsx prisma/seed.ts",
     "flows:export": "tsx scripts/export-flows.ts",
     "eval:classificar": "tsx scripts/eval-classificar.ts",
-    "test": "node --import tsx --test --test-force-exit test/*.test.ts",
+    "test": "jest",
     "lint": "biome lint src test",
     "format": "biome format --write src test",
     "check": "tsc --noEmit && biome lint src test && pnpm test"
@@ -36,11 +36,14 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.2",
     "@types/aws-lambda": "^8.10.162",
-    "@types/node": "^25.9.2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.9.5",
     "@types/pg": "^8.20.0",
     "esbuild": "^0.28.2",
+    "jest": "^30.4.2",
     "prisma": "^6.19.3",
-    "tsx": "^4.22.4",
+    "ts-jest": "^29.4.12",
+    "tsx": "^4.23.12",
     "typescript": "^6.0.3",
     "yaml": "^2.9.0"
   },
