@@ -63,23 +63,42 @@ describe("Não finalizar a conversa", () => {
 
 describe("Verificar se a conversa pode ser reaberta", () => {
   it("deve retornar true se a conversa não estiver finalizada e estiver dentro da janela de reabertura", () => {
-    const conversa = new Conversation({ canal: Canal.WHATSAPP, idPessoa: "123", flowId: "flow1" });
-    console.log(conversa);
-    expect(conversa.podeReabrir(10)).toBe(true);
-  });  
+    const conversa = new Conversation({
+      canal: Canal.WHATSAPP,
+      idPessoa: "123",
+      flowId: "flow1",
+    });
 
-    it("deve retornar false se a conversa estiver finalizada", () => {
-    const conversa = new Conversation({ canal: Canal.WHATSAPP, idPessoa: "123", flowId: "flow1" });
+    conversa.ultimaMensagemEm = new Date(Date.now());
+
+    expect(conversa.podeReabrir(new Date(), 24 * 60)).toBe(true);
+  });
+
+  it("deve retornar false se a conversa estiver finalizada", () => {
+    const conversa = new Conversation({
+      canal: Canal.WHATSAPP,
+      idPessoa: "123",
+      flowId: "flow1",
+    });
+
+    conversa.ultimaMensagemEm = new Date(Date.now());
     conversa.finalizar(MotivoFinalizacao.CONCLUIDA);
-    console.log(conversa);
-    expect(conversa.podeReabrir(10)).toBe(false);
-  }); 
+
+    expect(conversa.podeReabrir(new Date(), 24 * 60)).toBe(false);
+  });
 
   it("deve retornar false se a conversa estiver fora da janela de reabertura", () => {
-    const conversa = new Conversation({ canal: Canal.WHATSAPP, idPessoa: "123", flowId: "flow1" });
-    conversa.ultimaMensagemEm = new Date(Date.now() - 11 * 60 * 1000); // 11 minutos atrás
-    console.log(conversa);
-    expect(conversa.podeReabrir(10)).toBe(false);
+    const conversa = new Conversation({
+      canal: Canal.WHATSAPP,
+      idPessoa: "123",
+      flowId: "flow1",
+    });
+
+    conversa.ultimaMensagemEm = new Date(
+      Date.now() - 25 * 60 * 60 * 1000
+    );
+
+    expect(conversa.podeReabrir(new Date(), 24 * 60)).toBe(false);
   });
 });
 

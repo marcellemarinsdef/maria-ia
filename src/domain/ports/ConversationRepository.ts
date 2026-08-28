@@ -1,15 +1,18 @@
 import { Conversation } from "../entities/Conversation.js";
 
-export interface ConversationRepository{
-  buscarPorId(id: string): Promise<Conversation | null>;
+export interface ConversationRepository {
 
-  buscarAtivaPorCanal(
+  acharPorSessionId(sessionId: string): Promise<Conversation | null>;
+  acharUltimaPorSessionId(
     sessionId: string,
-    canal: string,
   ): Promise<Conversation | null>;
 
-buscarParaAbandono(params: {
-}): Promise<Conversation[]>;
+  buscarCandidatasAAbandono(
+    janelaMinutos: number,
+  ): Promise<Conversation[]>;
+    
 
   salvar(conversation: Conversation): Promise<void>;
+
+
 }

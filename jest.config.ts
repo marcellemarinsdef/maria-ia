@@ -21,7 +21,7 @@ const config: Config = {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
 
-  testMatch: ["**/*.unit.spec.ts"],
+  testMatch: ['**/*.spec.ts', '**/*.unit.spec.ts'],
 };
 
 export default config;

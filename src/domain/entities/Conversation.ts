@@ -43,8 +43,8 @@ class Conversation {
     tags?: string[];
     csat?: number | null;
   }) {
-    this.id = params.id ?? crypto.randomUUID();
-    this.sessionId = params.sessionId ?? crypto.randomUUID();
+    this.id = params.id ?? randomUUID();
+    this.sessionId = params.sessionId ?? randomUUID();
     this.canal = params.canal;
     this.idPessoa = params.idPessoa;
     this.flowId = params.flowId;
@@ -63,6 +63,24 @@ class Conversation {
     this.csat = params.csat ?? null;
   }
 
+ podeReabrir(data: Date, janelaMinutos: number): boolean {
+  if (this.estaFinalizada()) return false;
+  if (!this.ultimaMensagemEm) return false;
+
+  const decorrido =
+    data.getTime() - this.ultimaMensagemEm.getTime();
+
+  const janelaEmMilissegundos = janelaMinutos * 60_000;
+
+  return decorrido >= 0 && decorrido < janelaEmMilissegundos;
+}
+
+estaAbandonada(data: Date, janelaMinutos: number): boolean {
+  if (this.estaFinalizada()) return false;
+
+  return !this.podeReabrir(data, janelaMinutos);
+}
+
   finalizar(motivo: MotivoFinalizacao): void {
     if (this.finalizadaEm) throw new Error("Conversa já finalizada")
     this.finalizadaEm = new Date()
@@ -73,26 +91,30 @@ class Conversation {
     return this.finalizadaEm != null
   }
 
-  podeReabrir(janelaMinutos: number): boolean {
-    if (this.estaFinalizada()) return false
-    const decorrido = this.ultimaMensagemEm
-  ? Date.now() - this.ultimaMensagemEm.getTime()  : 0;
-    return decorrido < janelaMinutos * 60_000
-  }
+reabrirConversa(dataMensagemNova: Date): Conversation {
+    return new Conversation({
+      id: this.id,
+      sessionId: this.sessionId,
+      canal: this.canal,
+      idPessoa: this.idPessoa,
+      flowId: this.flowId,
+      dadosColetados: this.dadosColetados,
+      tags: this.tags,
+      ultimaMensagemEm: dataMensagemNova,
+    });
+}
 
-  verificarAbandono(janelaMinutos: number): void {
-    if (this.estaFinalizada()) {
-      return;
-    }
-
-    const decorrido = this.ultimaMensagemEm
-      ? Date.now() - this.ultimaMensagemEm.getTime()
-      : 0;
-
-    if (decorrido >= janelaMinutos * 60_000) {
-      this.finalizar(MotivoFinalizacao.ABANDONO);
-    }
-  }
+criarConversaRelacionadaAoSessionID(dataMensagemNova: Date): Conversation {
+    return new Conversation({
+    id: randomUUID(),
+    sessionId: this.sessionId,
+    canal: this.canal,
+    idPessoa: this.idPessoa,
+    flowId: this.flowId,
+    tags: this.tags,
+    ultimaMensagemEm: dataMensagemNova,
+  });
+}
 
 }
 
