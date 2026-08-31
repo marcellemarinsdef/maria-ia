@@ -1,6 +1,6 @@
 import { ConversationRepository } from "../../../../domain/ports/ConversationRepository.js";
 import { ReabrirConversaUseCase } from "../ReabrirConversa/reabrirConversa.usecase.js";
-import { CriarConversaRelacionadaAoSessionIdUseCase } from "../criarNovaConversaComMesmoSessionId/criarNovaConversaComMesmoSessionId.usecase.js";
+import { CriarConversaRelacionadaAoSessionIdUseCase } from "../criarConversaComMesmoSessionId/criarNovaConversaComMesmoSessionId.usecase.js";
 
 export class ProcessarNovaMensagemUseCase {
   constructor(

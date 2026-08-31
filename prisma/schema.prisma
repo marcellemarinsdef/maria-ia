@@ -7,268 +7,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Flow {
-  id         String        @id @default(cuid())
-  name       String
-  nodes      Json          @default("[]") // array de FlowNode
-  edges      Json          @default("[]") // array de FlowEdge
-  active     Boolean       @default(false)
-  // catálogo de templates (card #20260127) — metadado, não versiona
-  isTemplate Boolean       @default(false)
-  // dados de teste (issue #134) — seed de dadosColetados pra testar subfluxo
-  // isolado sem depender de nós anteriores do fluxo pai; metadado, não versiona
-  dadosTeste Json? // Record<string,string> — chave→valor default sugerido
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-  versions   FlowVersion[]
+enum Canal {
+  WHATSAPP
+  WEB
+  TELEGRAM
 }
 
-// Snapshot do fluxo a cada save (PUT) — permite histórico e rollback no painel.
-model FlowVersion {
-  id       String   @id @default(cuid())
-  flowId   String
-  flow     Flow     @relation(fields: [flowId], references: [id], onDelete: Cascade)
-  versao   Int // sequencial por flow (1, 2, 3...)
-  name     String
-  nodes    Json     @default("[]")
-  edges    Json     @default("[]")
-  autor    String? // email de quem salvou (do JWT)
-  criadoEm DateTime @default(now())
-
-  @@unique([flowId, versao])
-  @@index([flowId, criadoEm])
-}
-
-// Contagem de passagens por nó, por fluxo — funil/drop-off (card #20260119).
-// Incrementado a cada execução real do node (não é histórico, só contador
-// acumulado); usado por GET /admin/analytics/funil/{flowId}.
-model NodeVisita {
-  id        String   @id @default(cuid())
-  flowId    String
-  nodeId    String
-  total     Int      @default(0)
-  updatedAt DateTime @updatedAt
-
-  @@unique([flowId, nodeId])
-  @@index([flowId])
-}
-
-// Fila de retry de envios à DPERJ que falharam (antes em SQLite local efêmero).
-// bloqueadoAte: claim atômico entre réplicas da API (issue #68) — evita que
-// duas instâncias peguem o mesmo item pendente e reenviem duplicado.
-model DperjFila {
-  id           String    @id @default(cuid())
-  payload      Json
-  tentativas   Int       @default(0)
-  ultimoErro   String?
-  criadoEm     DateTime  @default(now())
-  bloqueadoAte DateTime?
-
-  @@index([criadoEm])
+enum MotivoFinalizacao {
+  CONCLUIDA
+  HANDOFF
+  RECUSADA
+  ABANDONO
 }
 
 model Conversation {
-  id             String    @id @default(cuid())
-  sessionId      String    @unique
-  channel        String // "whatsapp" | "web"
-  flowId         String? // null = grafo estático
-  status         String    @default("active") // "active" | "completed" | "abandoned"
-  categoria      String?
-  ultimaEtapa    String? // último node executado (análise de abandono)
-  dadosColetados Json      @default("{}")
-  // rótulos livres (card #20260139) — marcados/removidos pelo nó "tag" do
-  // fluxo (fila, motivo, "fora de área"...); contexto rápido pro atendente
-  // que assumir via handoff. Exibição no painel é feature separada.
-  tags           String[]  @default([])
-  // nota de satisfação 1-5 (card #20260128) — promovida de dadosColetados.csat
-  // em rastrearConversa() só quando inteiro 1..5; null = ainda sem nota
-  csat           Int?
-  resumo         String?   // resumo do caso (gerado no fim do atendimento)
-  metadados      Json?     // metadados limpos: identidade + caso + encaminhamento
-  protocoloDperj String?
-  startedAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  completedAt    DateTime?
+  id        String @id @default(uuid())
+  sessionId String
+  canal     Canal
+  idPessoa  String
+  flowId    String
 
-  // Handoff pra atendente humano (nó transferir_humano) — null = fluxo normal.
-  // "aguardando" = bot pausado, ninguém assumiu ainda; "em_atendimento" = um
-  // operador assumiu e responde diretamente; liberar volta a null.
-  handoffStatus   String? // "aguardando" | "em_atendimento"
-  handoffOperador String? // email/nome do operador que assumiu
-  handoffDesde    DateTime?
+  dadosColetados Json @default("{}")
 
-  @@index([startedAt])
-  @@index([handoffStatus])
-}
+  iniciadoEm       DateTime  @default(now())
+  ultimaMensagemEm DateTime?
+  finalizadaEm     DateTime?
 
-model User {
-  id    String @id @default(cuid())
-  email String @unique
-  senha String // hash bcrypt
-  nome  String @default("")
-  role  String @default("viewer") // "admin" | "viewer"
-}
+  motivoFinalizacao MotivoFinalizacao?
 
-// Auditoria de acesso a dados sensíveis (quem revelou PII, quando)
-model AuditLog {
-  id        String   @id @default(cuid())
-  userId    String
-  userEmail String
-  acao      String // "revelar"
-  alvoTipo  String // "assistido" | "conversa"
-  alvoId    String
-  criadoEm  DateTime @default(now())
+  ultimoFlowId String @default("")
+  ultimoNodeId String @default("")
 
-  @@index([criadoEm])
-}
+  tags String[] @default([])
+  csat Float?
 
-// Configuração global (singleton id="default"): preâmbulo de estilo aplicado
-// a toda geração de texto da IA (linguagem simples, tom da Defensoria).
-model Config {
-  id            String   @id @default("default")
-  estiloPrompt  String   @default("")
-  conversacional Boolean @default(true) // IA reescreve perguntas de forma acolhedora
-  // Horário de funcionamento (issue #79): aviso automático na saudação quando
-  // a conversa começa fora do expediente configurado. horarioAtivo=false
-  // nunca dispara o aviso, mesmo com os outros campos preenchidos.
-  horarioAtivo  Boolean  @default(false)
-  diasSemana    Int[]    @default([1, 2, 3, 4, 5]) // 0=domingo...6=sábado
-  horaInicio    String   @default("09:00") // HH:mm, timezone America/Sao_Paulo
-  horaFim       String   @default("18:00") // HH:mm, exclusive; sem overnight (fora de escopo)
-  updatedAt     DateTime @updatedAt
-}
-
-// Assistido = cidadão atendido (≠ User, que é o operador do painel).
-// O fluxo consulta por CPF, cadastra quem não existe e atualiza dados.
-model Assistido {
-  id             String   @id @default(cuid())
-  cpf            String   @unique // somente dígitos (11)
-  nome           String
-  dataNascimento String?
-  nomeMae        String?
-  situacao       String   @default("regular")
-  municipio      String?
-  uf             String?
-  telefone       String?
-  email          String?
-  cep            String?
-  bairro         String?
-  logradouro     String?
-  numero         String?
-  complemento    String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  casos          Caso[]
-  agendamentos   Agendamento[]
-}
-
-// Caso jurídico do assistido (processo/atendimento). Usado para identificar
-// casos em aberto na entrada do fluxo.
-model Caso {
-  id            String    @id @default(cuid())
-  identificador String // número/código visível ao assistido (ex: "0801234-56.2025")
-  tipo          String // "Pensão alimentícia", "Divórcio", ...
-  status        String    @default("aberto") // "aberto" | "encerrado"
-  assistidoId   String
-  assistido     Assistido @relation(fields: [assistidoId], references: [id], onDelete: Cascade)
-  criadoEm      DateTime  @default(now())
-
-  @@index([assistidoId, status])
-}
-
-// Agendamento do assistido (atendimento/audiência já marcado). Usado pra
-// identificar agendamentos em aberto na entrada do fluxo — mesmo papel de
-// Caso, mas pra compromissos marcados em vez de processos.
-model Agendamento {
-  id          String    @id @default(cuid())
-  tipo        String // "Atendimento inicial", "Audiência", "Reunião", ...
-  data        DateTime // data/hora marcada
-  local       String? // unidade/endereço
-  status      String    @default("aberto") // "aberto" | "cancelado" | "concluido"
-  assistidoId String
-  assistido   Assistido @relation(fields: [assistidoId], references: [id], onDelete: Cascade)
-  criadoEm    DateTime  @default(now())
-
-  @@index([assistidoId, status])
-}
-
-// PessoaPresa = "API fake" provisória pro subfluxo "Pessoa Presa" — substitui os
-// nós `api` do fluxo que apontavam pra URLs inventadas (sem integração SEAP real
-// ainda). Mesmo papel do model Assistido, mas pro apenado consultado pelo RG.
-// idPessoa/idSeap espelham os identificadores que o sistema de origem (SEAP)
-// devolveria — usados pelo fluxo pra encadear as chamadas seguintes (casos,
-// órgão responsável) sem precisar re-consultar por RG.
-model PessoaPresa {
-  id           String            @id @default(cuid())
-  rg           String            @unique // documento da pessoa presa, somente dígitos — chave de busca do fluxo
-  nome         String
-  situacao     String // ATIVO | LIBERTADO | FORAGIDO | EGRESSO | EVADIDO | EM VPF | EM RESDOM | EM TRABALHO EXTRAMURO | EM BAIXA HOSPITALAR | EM VPL HARMONIZADA | EM ABERTO-DOMICILIO COVID-19
-  tipoPreso    String // CONDENADO | SENTENCIADO | PROVISORIO | ...
-  regime       String? // fechado | semiaberto | aberto
-  idPessoa     String            @unique // id da pessoa no sistema de origem — usado pra consultar casos
-  idSeap       String            @unique // id estável no SEAP — usado pra consultar o órgão responsável
-  orgaoPreso   Json? // { nome, telefone, endereco } do órgão responsável enquanto ainda presa (null = sem órgão vinculado)
-  orgaoLiberto Json? // idem, órgão responsável depois de liberada (réu solto)
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  casos        CasoPessoaPresa[]
-}
-
-// Caso jurídico da pessoa presa (equivalente a Caso, mas pro subfluxo Pessoa
-// Presa). status em maiúsculas ("ABERTO") porque é o valor literal comparado
-// pelo nó `condicao` do fluxo (cond_status_caso, campo casos_pessoa_presa.status).
-model CasoPessoaPresa {
-  id            String      @id @default(cuid())
-  identificador String
-  tipo          String
-  status        String      @default("ABERTO") // "ABERTO" | "ENCERRADO"
-  pessoaPresaId String
-  pessoaPresa   PessoaPresa @relation(fields: [pessoaPresaId], references: [id], onDelete: Cascade)
-  criadoEm      DateTime    @default(now())
-
-  @@index([pessoaPresaId, status])
-}
-
-// Processo vinculado à pessoa presa, consultado por número (nó api_processo).
-// Sem relação direta com PessoaPresa — o fluxo consulta o processo ANTES do RG
-// (ver ordem dos nós), então não há como linkar de antemão.
-model ProcessoPessoaPresa {
-  id         String   @id @default(cuid())
-  numero     String   @unique // somente dígitos, como informado pelo assistido
-  origem     String // sistema de origem do processo, ex: "SEEU"
-  idProcesso String
-  createdAt  DateTime @default(now())
-}
-
-// PlantaoVigente = "API fake" provisória pro fluxo reutilizável "Plantão"
-// (escala de sobreaviso/urgência da Defensoria — vários órgãos podem estar de
-// plantão simultaneamente, em comarcas diferentes). Aparece em pelo menos 3
-// famílias de fluxo legado (Violência Doméstica, Novo caso, Falar de
-// processo/intimação) — daqui pra frente é um subfluxo próprio, não embutido.
-// `ativo` = está de plantão agora (no legado isso mudava por data/hora; aqui
-// é só um flag fixo de seed, sem rotação real). tipo "MUNICIPAL" no legado
-// não contava como plantão de urgência de verdade — a rota já filtra isso e
-// só retorna encontrado quando existe um ativo COM tipo != MUNICIPAL.
-model PlantaoVigente {
-  id        String   @id @default(cuid())
-  tipo      String // REGIONAL | MUNICIPAL | CAPITAL
-  municipio String
-  nomeOrgao String
-  telefone  String?
-  endereco  String?
-  ativo     Boolean  @default(true)
-  createdAt DateTime @default(now())
-}
-
-// RecessoVigente = "API fake" provisória pro fluxo reutilizável "Recesso"
-// (recesso forense — período em que os tribunais/DPERJ reduzem expediente).
-// Aparece em pelo menos 4 fluxos legados (Falar de processo/intimação, Novo
-// caso, Pessoa presa, Disponibilizar opções) — fluxo próprio no Orquestrador.
-// Config única (linha só, sem chave de busca) — liga/desliga manualmente
-// enquanto não há integração real com o calendário forense.
-model RecessoVigente {
-  id        String   @id @default(cuid())
-  ativo     Boolean  @default(false)
-  mensagem  String? // mostrada ao assistido quando ativo=true
-  updatedAt DateTime @updatedAt
+  @@index([idPessoa])
+  @@index([sessionId])
+  @@index([flowId])
+  @@index([canal])
+  @@index([iniciadoEm])
+  @@index([finalizadaEm])
 }

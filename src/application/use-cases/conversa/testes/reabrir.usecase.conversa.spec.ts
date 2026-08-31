@@ -5,7 +5,7 @@ import { InMemoryConversationRepository } from "../../../../infrastructure/repos
 import { MotivoFinalizacao } from "../../../../domain/value-objects/MotivoFinalizacao.js";
 import { ProcessarNovaMensagemUseCase } from "../../../use-cases/conversa/ProcessarNovaMensagemUseCase/ProcessarNovaMensagemUseCase.js";
 import { ReabrirConversaUseCase } from '../ReabrirConversa/reabrirConversa.usecase.js';
-import { CriarConversaRelacionadaAoSessionIdUseCase } from '../criarNovaConversaComMesmoSessionId/criarNovaConversaComMesmoSessionId.usecase.js';
+import { CriarConversaRelacionadaAoSessionIdUseCase } from '../criarConversaComMesmoSessionId/criarNovaConversaComMesmoSessionId.usecase.js';
 
 describe("ProcessarNovaMensagemUseCase", () => {
   it("não faz nada quando não existe conversa para a sessão", async () => {
