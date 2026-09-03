@@ -1,6 +1,7 @@
 import { ConversationRepository } from "../../../../domain/ports/ConversationRepository.js";
 import { ReabrirConversaUseCase } from "../ReabrirConversa/reabrirConversa.usecase.js";
 import { CriarConversaRelacionadaAoSessionIdUseCase } from "../criarConversaComMesmoSessionId/criarNovaConversaComMesmoSessionId.usecase.js";
+import { ConversaNaoEncontradaError } from "../../../errors/ConversaNaoEncontradaError.js";
 
 export class ProcessarNovaMensagemUseCase {
   constructor(
@@ -14,7 +15,7 @@ export class ProcessarNovaMensagemUseCase {
       await this.conversationRepository.acharUltimaPorSessionId(sessionId);
 
     if (!conversa) {
-      return;
+      throw new ConversaNaoEncontradaError();
     }
 
     if (

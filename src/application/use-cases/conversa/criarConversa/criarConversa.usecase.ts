@@ -14,6 +14,7 @@ export class CriarConversaUseCase {
             idPessoa: input.idPessoa,
             flowId: input.flowId,
         });
-        await this.conversationRepository.salvar(conversa);
+            await this.conversationRepository.salvar(conversa);
+
     }
 }

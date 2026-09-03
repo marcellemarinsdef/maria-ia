@@ -6,14 +6,13 @@ import { FinalizarConversasAbandonadas } from "../../application/use-cases/conve
 import { ProcessarNovaMensagemUseCase } from "../../application/use-cases/conversa/ProcessarNovaMensagemUseCase/ProcessarNovaMensagemUseCase.js";
 import { ReabrirConversaUseCase } from "../../application/use-cases/conversa/ReabrirConversa/reabrirConversa.usecase.js";
 import { Canal } from "../../domain/value-objects/Canal.js";
+import { ProcessarNovaMensagemDTOFactory } from "../../application/use-cases/conversa/ProcessarNovaMensagemUseCase/ProcessarNovaMensagemUseCase.dto.js";
 
 export class ConversationController {
     constructor(
        private readonly criarConversaUseCase: CriarConversaUseCase,
-   /*    private readonly criarNovaConversaComMesmoSessionIdUseCase: CriarConversaRelacionadaAoSessionIdUseCase,
        private readonly finalizarConversasAbandonadasUseCase: FinalizarConversasAbandonadas,
-       private readonly processarNovaMensagemUseCase: ProcessarNovaMensagemUseCase,
-       private readonly reabrirConversaUseCase: ReabrirConversaUseCase,*/
+       private readonly processarNovaMensagemUseCase: ProcessarNovaMensagemUseCase
     ) {}
 
     async criarConversa(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -33,5 +32,28 @@ export class ConversationController {
 
         reply.status(201).send();
     }
+
+    async finalizarConversasAbandonadas(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+        const { janelaMinutos } = request.body as {
+            janelaMinutos: number;
+        };
+
+        await this.finalizarConversasAbandonadasUseCase.executar({ janelaMinutos });
+
+        reply.status(200).send();
+    }
+
+    async processarNovaMensagem(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+        const dto = ProcessarNovaMensagemDTOFactory.criar(
+            request.body as {
+            sessionId: string;
+            dataMensagemNova: string;
+            }
+        );
+
+        await this.processarNovaMensagemUseCase.executar(dto.sessionId, dto.dataMensagemNova);
+
+        reply.status(200).send();
+    } 
     
 }

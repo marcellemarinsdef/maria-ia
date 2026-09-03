@@ -1,0 +1,12 @@
+export abstract class ApplicationError extends Error {
+  abstract readonly statusCode: number;
+  abstract readonly code: string;
+
+  protected constructor(message: string) {
+    super(message);
+
+    this.name = new.target.name;
+
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
