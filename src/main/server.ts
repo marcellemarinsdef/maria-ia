@@ -14,6 +14,9 @@ import { PrismaConversationRepository } from "../infrastructure/database/prisma/
 
 import { errorHandler } from "../interfaces/errors/errorHandler.js";
 
+import { setupSwagger } from "../interfaces/swagger/swagger.js";
+
+
 const app = Fastify({
   logger: true,
 });
@@ -58,6 +61,8 @@ const conversationController =
   );
 
 app.setErrorHandler(errorHandler);
+
+await setupSwagger(app);
 
 await app.register(
   async (fastify) => {
