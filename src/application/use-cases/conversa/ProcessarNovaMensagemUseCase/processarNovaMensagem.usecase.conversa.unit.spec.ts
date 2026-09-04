@@ -1,14 +1,15 @@
-import { describe, it, expect, beforeEach,afterEach, jest } from '@jest/globals';
-import { Conversation } from "../../../../domain/entities/Conversation.js";
+import { describe, it, expect } from '@jest/globals';
+import { Conversation } from "../../../../domain/entities/Conversation/Conversation.js";
 import { Canal } from "../../../../domain/value-objects/Canal.js";
 import { InMemoryConversationRepository } from "../../../../infrastructure/repositories/InMemoryConversationRepository.js";
 import { MotivoFinalizacao } from "../../../../domain/value-objects/MotivoFinalizacao.js";
 import { ProcessarNovaMensagemUseCase } from "../../../use-cases/conversa/ProcessarNovaMensagemUseCase/ProcessarNovaMensagemUseCase.js";
 import { ReabrirConversaUseCase } from '../ReabrirConversa/reabrirConversa.usecase.js';
 import { CriarConversaRelacionadaAoSessionIdUseCase } from '../criarConversaComMesmoSessionId/criarNovaConversaComMesmoSessionId.usecase.js';
+import { ConversaNaoEncontradaError } from '../../../errors/ConversaNaoEncontradaError.js';
 
 describe("ProcessarNovaMensagemUseCase", () => {
-  it("não faz nada quando não existe conversa para a sessão", async () => {
+  it("lança um erro quando não existe conversa para a sessão", async () => {
     const repository = new InMemoryConversationRepository();
     const mensagemAtualEm = new Date("2026-08-25T18:02:02.021Z");
     const reabrirUseCase = new ReabrirConversaUseCase(repository);
@@ -20,13 +21,9 @@ describe("ProcessarNovaMensagemUseCase", () => {
       criarConversaUseCase
     );
 
-    await useCase.executar("session-inexistente", mensagemAtualEm);
-
-    const conversa = await repository.acharUltimaPorSessionId(
-      "session-inexistente",
-    );
-
-    expect(conversa).toBeNull();
+    await expect(
+      useCase.executar("session-inexistente", mensagemAtualEm)
+    ).rejects.toThrow(ConversaNaoEncontradaError);
   });
 
   it("mantém a mesma conversa quando a última mensagem foi há menos de 24 horas", async () => {

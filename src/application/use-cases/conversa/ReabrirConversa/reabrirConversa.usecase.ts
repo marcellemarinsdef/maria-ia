@@ -1,4 +1,4 @@
-import { Conversation } from "../../../../domain/entities/Conversation.js";
+import { Conversation } from "../../../../domain/entities/Conversation/Conversation.js";
 import { ConversationRepository } from "../../../../domain/ports/ConversationRepository.js";
 
 export class ReabrirConversaUseCase {

@@ -1,5 +1,5 @@
-import { Canal } from "../value-objects/Canal.js";
-import { MotivoFinalizacao } from "../value-objects/MotivoFinalizacao.js";
+import { Canal } from "../../value-objects/Canal.js";
+import { MotivoFinalizacao } from "../../value-objects/MotivoFinalizacao.js";
 import { randomUUID } from "crypto";
 
 class Conversation {

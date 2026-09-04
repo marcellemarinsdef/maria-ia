@@ -1,33 +1,41 @@
 import type { Config } from "jest";
 
 const config: Config = {
-  preset: "ts-jest/presets/default-esm",
-
   testEnvironment: "node",
 
+  // Diz ao Jest para tratar arquivos .ts como ESM nativo
   extensionsToTreatAsEsm: [".ts"],
 
   transform: {
-    "^.+\\.tsx?$": [
-      "ts-jest",
+    // Substitui o ts-jest pelo @swc/jest
+    "^.+\\.(t|j)sx?$": [
+      "@swc/jest",
       {
-        useESM: true,
-        isolatedModules: true,
+        jsc: {
+          parser: {
+            syntax: "typescript",
+            tsx: false,
+          },
+          // Mantém compatibilidade com decorators se você os utiliza (ex: TypeORM, NestJS)
+          transform: {
+            legacyDecorator: true,
+            decoratorMetadata: true,
+          },
+        },
+        module: {
+          // OBRIGATÓRIO PARA ESM: Garante que o SWC mantenha os imports como ESM
+          type: "es6", 
+        },
       },
     ],
   },
 
+  // Mantém o mapeamento de extensões .js para arquivos .ts
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
 
-  testMatch: ['**/*.spec.ts', '**/*.unit.spec.ts'],
+  testMatch: ["**/*.spec.ts", "**/*.unit.spec.ts"],
 };
 
 export default config;
-
-//NODE_OPTIONS=--experimental-vm-modules npx jest src/application/use-cases/conversas/iniciar/iniciar.conversa.unit.spec.ts
-
-//NODE_OPTIONS=--experimental-vm-modules npx jest
-
-//npm test

@@ -1,4 +1,4 @@
-import { Conversation } from "../entities/Conversation.js";
+import { Conversation } from "../entities/Conversation/Conversation.js";
 
 export interface ConversationRepository {
 

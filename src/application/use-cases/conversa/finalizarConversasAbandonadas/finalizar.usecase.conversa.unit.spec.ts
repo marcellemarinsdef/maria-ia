@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach,afterEach, jest } from '@jest/globals';
 import { FinalizarConversasAbandonadas } from "../finalizarConversasAbandonadas/finalizarConversasAbandonadas.usecase.js";
 import { ConversationRepository } from "../../../../domain/ports/ConversationRepository.js";
-import { Conversation } from "../../../../domain/entities/Conversation.js";
+import { Conversation } from "../../../../domain/entities/Conversation/Conversation.js";
 import { MotivoFinalizacao } from "../../../../domain/value-objects/MotivoFinalizacao.js";
 
 describe("FinalizarConversasAbandonadas", () => {
