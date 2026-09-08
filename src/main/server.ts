@@ -16,7 +16,7 @@ import { errorHandler } from "../interfaces/errors/errorHandler.js";
 
 import { setupSwagger } from "../interfaces/swagger/swagger.js";
 
-
+/*
 const app = Fastify({
   logger: true,
 });
@@ -72,6 +72,23 @@ await app.register(
     );
   },
 );
+
+try {
+  await app.listen({
+    port: 3000,
+    host: "0.0.0.0",
+  });
+} catch (error) {
+  app.log.error(error);
+
+  await prisma.$disconnect();
+
+  process.exit(1);
+} */
+
+  import { buildApp } from "./app.js";
+
+const { app, prisma } = await buildApp();
 
 try {
   await app.listen({

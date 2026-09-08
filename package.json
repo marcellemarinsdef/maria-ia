@@ -24,7 +24,7 @@
     "check": "tsc --noEmit && biome lint src test && pnpm test",
     "buildR": "prisma generate && tsc",
     "devR": "tsx src/main/server.ts",
-    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --testMatch='**/*.unit.spec.ts'"
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --testMatch='**/*.{unit,integration}.spec.ts'"
   },
   "keywords": [],
   "author": "",

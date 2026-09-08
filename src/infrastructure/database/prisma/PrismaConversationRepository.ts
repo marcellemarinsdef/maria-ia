@@ -1,4 +1,6 @@
-import { PrismaClient, Prisma, Conversation as PrismaConversation} from "@prisma/client";
+import { PrismaClient } from "../../../generated/prisma/client.js";
+import type { Conversation as PrismaConversation } from "../../../generated/prisma/client.js";
+
 import { Conversation } from "../../../domain/entities/Conversation/Conversation.js";
 import { ConversationRepository } from "../../../domain/ports/ConversationRepository.js";
 import { Canal } from "../../../domain/value-objects/Canal.js";
