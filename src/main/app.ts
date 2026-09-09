@@ -1,5 +1,5 @@
 import Fastify from "fastify";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma/index.js";
 
 import { ConversationController } from "../interfaces/controllers/ConversationController.js";
 import { conversationRoutes } from "../interfaces/routes/conversationRoutes.js";

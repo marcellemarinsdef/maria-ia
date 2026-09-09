@@ -1,10 +1,7 @@
-import { PrismaClient, Conversation as PrismaConversation} from "@prisma/client";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { CriarConversaUseCase } from "../../application/use-cases/conversa/criarConversa/criarConversa.usecase.js";
-import { CriarConversaRelacionadaAoSessionIdUseCase } from "../../application/use-cases/conversa/criarConversaComMesmoSessionId/criarNovaConversaComMesmoSessionId.usecase.js";
 import { FinalizarConversasAbandonadas } from "../../application/use-cases/conversa/finalizarConversasAbandonadas/finalizarConversasAbandonadas.usecase.js";
 import { ProcessarNovaMensagemUseCase } from "../../application/use-cases/conversa/ProcessarNovaMensagemUseCase/ProcessarNovaMensagemUseCase.js";
-import { ReabrirConversaUseCase } from "../../application/use-cases/conversa/ReabrirConversa/reabrirConversa.usecase.js";
 import { Canal } from "../../domain/value-objects/Canal.js";
 import { ProcessarNovaMensagemDTOFactory } from "../../application/use-cases/conversa/ProcessarNovaMensagemUseCase/ProcessarNovaMensagemUseCase.dto.js";
 
