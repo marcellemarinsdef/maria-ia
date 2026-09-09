@@ -1,37 +1,37 @@
 services:
-postgres:
-image: postgres:16-alpine
-environment:
-POSTGRES_DB: maria-postgres-test
-POSTGRES_USER: maria
-POSTGRES_PASSWORD: maria321
-healthcheck:
-test:
-[
-"CMD-SHELL",
-"pg_isready -U maria -d maria-postgres-test"
-]
-interval: 5s
-timeout: 5s
-retries: 10
-start_period: 5s
-
-tests:
-build:
-context: .
-dockerfile: Dockerfile.test
-
-environment:
-  DATABASE_URL: postgresql://maria:maria321@postgres:5432/maria-postgres-test
-  NODE_ENV: test
-
-depends_on:
   postgres:
-    condition: service_healthy
+    image: postgres:16-alpine
 
-command:
-  - sh
-  - -c
-  - |
-    pnpm prisma migrate deploy
-    pnpm test:integration
+    environment:
+      POSTGRES_DB: maria-postgres-test
+      POSTGRES_USER: maria
+      POSTGRES_PASSWORD: maria321
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U maria -d maria-postgres-test
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+
+    environment:
+      DATABASE_URL: postgresql://maria:maria321@postgres:5432/maria-postgres-test
+      NODE_ENV: test
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    command:
+      - sh
+      - -c
+      - |
+        pnpm prisma migrate deploy
+        pnpm test:integration
