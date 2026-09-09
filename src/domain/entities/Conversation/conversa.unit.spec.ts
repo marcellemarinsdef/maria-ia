@@ -8,7 +8,7 @@ import { MotivoFinalizacao } from '../../value-objects/MotivoFinalizacao.js';
 describe("Iniciar Conversa", () => {
   it("deve iniciar a conversa com sucesso", () => {
     const conversa = new Conversation({ canal: Canal.WHATSAPP, idPessoa: "123", flowId: "flow1" });
-    // console.log(conversa);
+
     expect(conversa).toEqual({
         canal: Canal.WHATSAPP,
         idPessoa: "123",
@@ -32,13 +32,13 @@ describe("verificar se a conversa está finalizada", () => {
   it("deve retornar true se a conversa estiver finalizada", () => {
     const conversa = new Conversation({ canal: Canal.WHATSAPP, idPessoa: "123", flowId: "flow1" });
     conversa.finalizar(MotivoFinalizacao.CONCLUIDA);
-    // console.log(conversa);
+
     expect(conversa.estaFinalizada()).toBe(true);
   });
 
   it("deve retornar false se a conversa não estiver finalizada", () => {
     const conversa = new Conversation({ canal: Canal.WHATSAPP, idPessoa: "123", flowId: "flow1" });
-    // console.log(conversa);
+
     expect(conversa.estaFinalizada()).toBe(false);
   });
 });
@@ -47,7 +47,7 @@ describe("Finalizar Conversa", () => {
   it("deve finalizar a conversa com sucesso", () => {
     const conversa = new Conversation({ canal: Canal.WHATSAPP, idPessoa: "123", flowId: "flow1" });
     conversa.finalizar(MotivoFinalizacao.ABANDONO);
-    // console.log(conversa);
+
     expect(conversa.estaFinalizada()).toBe(true);
   });
 });
@@ -56,7 +56,7 @@ describe("Não finalizar a conversa", () => {
   it("não deve finalizar a conversa se ela já estiver finalizada", () => {
     const conversa = new Conversation({ canal: Canal.WHATSAPP, idPessoa: "123", flowId: "flow1" });
     conversa.finalizar(MotivoFinalizacao.CONCLUIDA);
-    // console.log(conversa);
+
     expect(() => {
       conversa.finalizar(MotivoFinalizacao.ABANDONO);
     }).toThrow("Conversa já finalizada");

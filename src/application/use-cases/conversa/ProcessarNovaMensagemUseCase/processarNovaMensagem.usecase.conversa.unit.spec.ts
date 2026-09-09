@@ -3,7 +3,7 @@ import { Conversation } from "../../../../domain/entities/Conversation/Conversat
 import { Canal } from "../../../../domain/value-objects/Canal.js";
 import { InMemoryConversationRepository } from "../../../../infrastructure/repositories/InMemoryConversationRepository.js";
 import { MotivoFinalizacao } from "../../../../domain/value-objects/MotivoFinalizacao.js";
-import { ProcessarNovaMensagemUseCase } from "../../../use-cases/conversa/ProcessarNovaMensagemUseCase/ProcessarNovaMensagemUseCase.js";
+import { ProcessarNovaMensagemUseCase } from "./ProcessarNovaMensagemUseCase.js";
 import { ReabrirConversaUseCase } from '../ReabrirConversa/reabrirConversa.usecase.js';
 import { CriarConversaRelacionadaAoSessionIdUseCase } from '../criarConversaComMesmoSessionId/criarNovaConversaComMesmoSessionId.usecase.js';
 import { ConversaNaoEncontradaError } from '../../../errors/ConversaNaoEncontradaError.js';
@@ -100,9 +100,6 @@ it("cria uma nova conversa quando a última mensagem tem mais de 24 horas", asyn
       "session-123",
     );
 
-
-        console.log("conversaOriginal", conversaOriginal);
-    console.log("resultado", resultado);
   expect(resultado).not.toBeNull();
 
   expect(resultado?.id).not.toBe(

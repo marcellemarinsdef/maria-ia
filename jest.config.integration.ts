@@ -30,7 +30,7 @@ const config: Config = {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
 
-  testMatch: ["**/*.spec.ts", "**/*.unit.spec.ts"],
+  testMatch: ["**/*.integration.spec.ts"],
 
   setupFiles: ["<rootDir>/tests/setup.ts"],
 };

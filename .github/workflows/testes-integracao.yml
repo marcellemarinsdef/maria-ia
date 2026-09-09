@@ -1,0 +1,38 @@
+name: Build and Integration Tests
+
+on:
+  push:
+    branches:
+      - development
+      - main
+
+  pull_request:
+    branches:
+      - development
+      - main
+
+jobs:
+test:
+name: Integration Tests
+runs-on: ubuntu-latest
+
+permissions:
+  contents: read
+
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
+    with:
+      fetch-depth: 0
+
+  - name: Build e executar testes
+    run: |
+      docker compose -f docker-compose.test.yml up \
+        --build \
+        --abort-on-container-exit \
+        --exit-code-from tests
+
+  - name: Limpar containers
+    if: always()
+    run: |
+      docker compose -f docker-compose.test.yml down -v

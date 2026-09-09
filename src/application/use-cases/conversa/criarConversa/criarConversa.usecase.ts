@@ -7,14 +7,14 @@ export class CriarConversaUseCase {
         private readonly conversationRepository: ConversationRepository,
     ) {}
 
-    async executar(input: CriarConversaInput): Promise<void> {
+    async executar(input: CriarConversaInput): Promise<Conversation> {
         const conversa = new Conversation({
             ultimaMensagemEm: input.ultimaMensagemEm,
             canal: input.canal,
             idPessoa: input.idPessoa,
             flowId: input.flowId,
         });
-            await this.conversationRepository.salvar(conversa);
+            return await this.conversationRepository.salvar(conversa);
 
     }
 }

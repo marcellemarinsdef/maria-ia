@@ -12,7 +12,7 @@ export interface ConversationRepository {
   ): Promise<Conversation[]>;
     
 
-  salvar(conversation: Conversation): Promise<void>;
+  salvar(conversation: Conversation): Promise<Conversation>;
 
 
 }

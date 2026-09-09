@@ -58,17 +58,18 @@ async acharUltimaPorSessionId(
 
   async salvar(
     conversa: Conversation,
-  ): Promise<void> {
+  ): Promise<Conversation> {
     const index = this.conversas.findIndex(
       (item) => item.id === conversa.id,
     );
 
     if (index >= 0) {
       this.conversas[index] = conversa;
-      return;
+      return conversa;
     }
 
     this.conversas.push(conversa);
+    return conversa;
   }
   
 }

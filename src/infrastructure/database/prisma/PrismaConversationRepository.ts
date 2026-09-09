@@ -96,9 +96,9 @@ export class PrismaConversationRepository
 
   async salvar(
     conversa: Conversation,
-  ): Promise<void> {
+  ): Promise<Conversation> {
     try {
-      await this.prisma.conversation.upsert({
+      const conversaPersistida = await this.prisma.conversation.upsert({
         where: {
           id: conversa.id,
         },
@@ -122,6 +122,7 @@ export class PrismaConversationRepository
           flowId: conversa.flowId,
         },
       });
+      return this.toDomain(conversaPersistida);
     } catch (error) {
       throw this.mapDatabaseError(
         error,

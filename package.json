@@ -24,7 +24,12 @@
     "check": "tsc --noEmit && biome lint src test && pnpm test",
     "buildR": "prisma generate && tsc",
     "devR": "tsx src/main/server.ts",
-    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --testMatch='**/*.{unit,integration}.spec.ts'"
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --testMatch='**/*.{unit,integration}.spec.ts'",
+    "test:integration": "jest --config jest.config.integration.ts",
+    "dev3": "cross-env NODE_ENV=development node dist/main.js",
+    "test2": "cross-env NODE_ENV=test jest",
+    "test:watch": "cross-env NODE_ENV=test jest --watch",
+    "test:coverage": "cross-env NODE_ENV=test jest --coverage"
   },
   "keywords": [],
   "author": "",
@@ -56,6 +61,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^25.9.5",
     "@types/pg": "^8.20.0",
+    "cross-env": "^10.1.0",
     "esbuild": "^0.28.2",
     "jest": "^30.4.2",
     "prisma": "^6.19.3",
