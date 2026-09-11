@@ -13,19 +13,26 @@ import { ReabrirConversaUseCase } from "../application/use-cases/conversa/Reabri
 import { PrismaConversationRepository } from "../infrastructure/database/prisma/PrismaConversationRepository.js";
 import { errorHandler } from "../interfaces/errors/errorHandler.js";
 import { setupSwagger } from "../interfaces/swagger/swagger.js";
+import { conectarRedis, redis } from "../infrastructure/redis/redis.js";
+import { RedisConversationCreationLock } from "../infrastructure/redis/RedisConversationCreationLock.js";
 
 export async function buildApp() {
   const app = Fastify({
     logger: true,
   });
 
+  await conectarRedis();
+
   const prisma = new PrismaClient();
 
   const conversationRepository =
     new PrismaConversationRepository(prisma);
 
+  const conversationCreationLock =
+  new RedisConversationCreationLock(redis);
+
   const criarConversaUseCase =
-    new CriarConversaUseCase(conversationRepository);
+  new CriarConversaUseCase(conversationRepository, conversationCreationLock);
 
   const finalizarConversasAbandonadasUseCase =
     new FinalizarConversasAbandonadas(conversationRepository);

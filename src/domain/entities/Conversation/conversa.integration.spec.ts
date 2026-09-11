@@ -4,17 +4,23 @@ import { PrismaConversationRepository } from "../../../infrastructure/database/p
 import { prisma } from "../../../infrastructure/database/prisma/prisma.js";
 import { CriarConversaUseCase } from "../../../application/use-cases/conversa/criarConversa/criarConversa.usecase.js";
 import { buildApp } from '../../../main/app.js';
+import { redis } from '../../../infrastructure/redis/redis.js';
+import { RedisConversationCreationLock } from '../../../infrastructure/redis/RedisConversationCreationLock.js';
 
 describe('CriarConversa', () => {
     beforeEach(async () => {
         await prisma.conversation.deleteMany();
     });
 
+    //verificar esse primeiro teste
+    //verificar por que o jest nao ta parando após executar os testes -> This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.
 it('deve criar uma conversa no banco de dados', async () => {
 
     const repository = new PrismaConversationRepository(prisma);
 
-    const sut = new CriarConversaUseCase(repository);
+    const conversationCreationLock = new RedisConversationCreationLock(redis);
+
+    const sut = new CriarConversaUseCase(repository, conversationCreationLock);
 
 
     const conversa = await sut.executar({
@@ -125,13 +131,11 @@ beforeEach(async () => {
 
     await prisma.conversation.deleteMany();
 
+    const repository = new PrismaConversationRepository(prisma);
 
-    const repository =
-        new PrismaConversationRepository(prisma);
+    const conversationCreationLock = new RedisConversationCreationLock(redis);
 
-
-    const sut =
-        new CriarConversaUseCase(repository);
+    const sut = new CriarConversaUseCase(repository, conversationCreationLock);
 
 
     await sut.executar({

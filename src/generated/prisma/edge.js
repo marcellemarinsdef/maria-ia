@@ -161,7 +161,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/marcelle/projetos/maria-ia/src/generated/prisma",
+      "value": "/home/marin/maria-ia/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -175,7 +175,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/marcelle/projetos/maria-ia/prisma/schema.prisma",
+    "sourceFilePath": "/home/marin/maria-ia/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -189,6 +189,7 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
